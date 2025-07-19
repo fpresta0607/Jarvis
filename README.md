@@ -18,7 +18,8 @@ CodePilot is a web application that generates full HTML/CSS/JS code from a natur
 
 ### Backend
 
-1. Copy `.env.example` to `.env` and add your OpenAI API key.
+1. Copy `.env.example` to `.env` and add your OpenAI API key. The `.env` file is
+   ignored by git so your secret stays local.
 2. Install dependencies and start the server:
 
 ```bash
