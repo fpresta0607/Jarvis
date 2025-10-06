@@ -36,37 +36,64 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 
 ```mermaid
 flowchart LR
+  %% ==== Client & Edge ====
   user["User (Browser)"] --> ui["Web App (CloudFront + S3 + Cognito)"]
   ui --> api["API Gateway (HTTP + WS)"]
-  api --> ecs["ECS Fargate Services"]
+  api --> ecs_api["ECS: api-bff"]
+  ecs_api --> ecs_chat["ECS: chat-orchestrator"]
 
+  %% ==== Ingestion Pipeline ====
   subgraph Ingestion_Pipeline
-    s3raw["S3 Raw Bucket"] --> sqsIngest["SQS Ingest Queue"]
-    sqsIngest --> sfn["Step Functions Orchestrator"]
-    sfn --> tex["Textract"]
-    sfn --> trs["Transcribe"]
-    sfn --> rek["Rekognition"]
+    ui -. "Pre-signed PUT" .-> s3_raw["S3 Raw Bucket"]
+    ses_in["SES Inbound"] --> s3_raw
+    s3_raw --> sqs_ing["SQS Ingest Queue"]
+    sqs_ing --> sfn["Step Functions: ProcessObject"]
+
+    sfn --> tex["Textract (PDF/Scans)"]
+    sfn --> rek["Rekognition (Images)"]
+    sfn --> trs["Transcribe (Audio/Video)"]
+    sfn --> cmp["Comprehend (Entities/PII)"]
+
     tex --> norm["Normalize + Chunk"]
-    trs --> norm
     rek --> norm
+    trs --> norm
+    cmp --> norm
+
     norm --> emb["Embed (Bedrock)"]
+    emb --> os[("OpenSearch (Vector+BM25)")]
+    norm --> s3_cur["S3 Curated Bucket"]
+    s3_cur -. "KB sync" .-> kb["Bedrock Knowledge Base"]
   end
 
-  emb --> os[("OpenSearch")]
-  norm --> s3cur["S3 Curated Bucket"]
+  %% ==== Assistant Retrieval ====
+  ecs_chat --> agent["Bedrock Agent"]
+  agent --> kb
+  agent --> os
 
-  subgraph Data_and_Knowledge_Stores
-    kb["Bedrock Knowledge Base"]
-    os
-    aur["Aurora pgvector"]
-    ddb["DynamoDB"]
+  %% ==== Actions / Tools ====
+  subgraph Actions
+    agent --> t_email["ECS: tools-email"]
+    t_email --> ses_out["SES Send"]
+
+    agent --> t_tasks["ECS: tools-tasks"]
+    t_tasks --> ddb["DynamoDB (Tasks/Drafts/Sessions)"]
+
+    agent --> t_rem["ECS: tools-reminders"]
+    t_rem --> evb["EventBridge (Schedules)"]
+    evb --> sns["SNS / Notifications"]
   end
 
-  ecs --> kb
-  ecs --> os
-  ecs --> aur
-  ecs --> ddb
-  sfn --> ecs
+  %% ==== Long-term Memory ====
+  subgraph Memory
+    nightly["ECS: memory-reflector (Nightly)"] --> aur["Aurora pgvector (User Memory)"]
+    nightly --> os
+  end
+
+  %% ==== Cross-links ====
+  sfn -. "may invoke" .-> ecs_proc["ECS: processor-* (optional workers)"]
+  ecs_api --> os
+  ecs_api --> ddb
+  ecs_api --> evb
 
 ```
 </details>
