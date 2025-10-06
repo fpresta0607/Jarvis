@@ -36,7 +36,6 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 
 ```mermaid
 flowchart LR
-  %% High-level system architecture
   user[User (Browser/Mobile)] --> ui[Web App (CloudFront + S3, Cognito)]
   ui --> api[API Gateway (HTTP/WS)]
   api --> ecs[ECS Cluster (Fargate Services)]
