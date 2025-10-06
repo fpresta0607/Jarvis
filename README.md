@@ -37,7 +37,7 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 ```mermaid
 flowchart LR
   %% Jarvis High-level Architecture (sanitized & expanded)
-  user[User (Browser/Mobile)] --> ui[Web App (CloudFront + S3 + Cognito)]
+  user[User (Browser)] --> ui[Web App (CloudFront + S3 + Cognito)]
   ui --> api[API Gateway (HTTP + WS)]
   api --> ecs[ECS Fargate Services]
 
