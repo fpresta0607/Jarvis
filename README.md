@@ -36,14 +36,29 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 
 ```mermaid
 flowchart LR
+  %% High-level system architecture
   user[User (Browser/Mobile)] --> ui[Web App (CloudFront + S3, Cognito)]
   ui --> api[API Gateway (HTTP/WS)]
   api --> ecs[ECS Cluster (Fargate Services)]
-  ecs --> kb[Bedrock Knowledge Base]
-  ecs --> os[(OpenSearch Serverless)]
-  ecs --> aur[(Aurora pgvector)]
-  ecs --> ddb[(DynamoDB)]
-  s3[(S3 Raw + Curated)] --> sqs[SQS] --> sfn[Step Functions] --> ecs
+
+  subgraph DataPlane[Data / Knowledge Stores]
+    kb[Bedrock Knowledge Base]
+    os[(OpenSearch Serverless)]
+    aur[(Aurora pgvector)]
+    ddb[(DynamoDB)]
+  end
+
+  ecs --> kb
+  ecs --> os
+  ecs --> aur
+  ecs --> ddb
+
+  subgraph Ingestion[Ingestion Pipeline]
+    s3[(S3 Raw + Curated)] --> sqs[SQS Queue]
+    sqs --> sfn[Step Functions Orchestrator]
+  end
+
+  sfn --> ecs
 ```
 </details>
 
