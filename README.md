@@ -1,5 +1,5 @@
 # 🧠 Jarvis — Personal AI Assistant on AWS Fargate
-> A secure, self-hosted, auto-scaling AI assistant that connects to your personal data — emails, photos, files, and more — entirely within ### Sequence — "Summarize emails + reminder"
+> A secure, self-hosted, auto-scaling AI assistant that connects to your personal data — emails, photos, files, and more
 
 ```mermaid
 sequenceDiagram
