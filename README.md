@@ -35,16 +35,36 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 <summary><b>Click to expand architecture diagram</b></summary>
 
 ```mermaid
-%% Minimal baseline to isolate parse error. If this renders, issue was formatting/hidden chars in prior block.
 flowchart LR
+  %% Jarvis High-level Architecture (sanitized & expanded)
+  user[User (Browser/Mobile)] --> ui[Web App (CloudFront + S3 + Cognito)]
+  ui --> api[API Gateway (HTTP + WS)]
+  api --> ecs[ECS Fargate Services]
 
-  A[User] --> B[Web App]
-  B --> C[API Gateway]
-  C --> D[ECS Cluster]
-  D --> E[(Data Store)]
-  D --> F[(Search)]
+  subgraph Ingestion Pipeline
+    s3raw[S3 Raw Bucket] --> sqsIngest[SQS Ingest Queue]
+    sqsIngest --> sfn[Step Functions Orchestrator]
+    sfn --> proc[Processors (Textract / Transcribe / Rekognition)]
+    proc --> norm[Normalize + Chunk]
+    norm --> emb[Embed (Bedrock)]
+  end
 
-  %% Re-expand once confirmed working.
+  emb --> os[(OpenSearch)]
+  norm --> s3cur[S3 Curated Bucket]
+
+  subgraph Data & Knowledge Stores
+    kb[Bedrock Knowledge Base]
+    os
+    aur[Aurora pgvector]
+    ddb[DynamoDB]
+  end
+
+  ecs --> kb
+  ecs --> os
+  ecs --> aur
+  ecs --> ddb
+
+  sfn --> ecs
 ```
 </details>
 
