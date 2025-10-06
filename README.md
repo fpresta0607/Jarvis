@@ -70,13 +70,6 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 
 ```mermaid
 flowchart LR
-  %% STYLE DEFINITIONS
-  classDef compute fill=#1f2937,stroke=#111,color=#fff,rx=4,ry=4;
-  classDef storage fill=#065f46,stroke=#033d2d,color=#fff,rx=4,ry=4;
-  classDef db fill=#0f766e,stroke=#064e3b,color=#fff,rx=4,ry=4;
-  classDef messaging fill=#7c2d12,stroke=#431407,color=#fff,rx=4,ry=4;
-  classDef service fill=#374151,stroke=#111,color=#fff,rx=4,ry=4;
-  classDef ai fill=#4c1d95,stroke=#2e1065,color=#fff,rx=4,ry=4;
 
   %% ==== Client & Edge ====
   user["User"]:::compute --> web["Web App (CloudFront + S3 + Cognito)"]:::compute
