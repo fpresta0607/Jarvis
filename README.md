@@ -35,29 +35,16 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 <summary><b>Click to expand architecture diagram</b></summary>
 
 ```mermaid
+%% Minimal baseline to isolate parse error. If this renders, issue was formatting/hidden chars in prior block.
 flowchart LR
-  user[User (Browser/Mobile)] --> ui[Web App (CloudFront + S3, Cognito)]
-  ui --> api[API Gateway (HTTP/WS)]
-  api --> ecs[ECS Cluster (Fargate Services)]
 
-  subgraph DataPlane[Data / Knowledge Stores]
-    kb[Bedrock Knowledge Base]
-    os[(OpenSearch Serverless)]
-    aur[(Aurora pgvector)]
-    ddb[(DynamoDB)]
-  end
+  A[User] --> B[Web App]
+  B --> C[API Gateway]
+  C --> D[ECS Cluster]
+  D --> E[(Data Store)]
+  D --> F[(Search)]
 
-  ecs --> kb
-  ecs --> os
-  ecs --> aur
-  ecs --> ddb
-
-  subgraph Ingestion[Ingestion Pipeline]
-    s3[(S3 Raw + Curated)] --> sqs[SQS Queue]
-    sqs --> sfn[Step Functions Orchestrator]
-  end
-
-  sfn --> ecs
+  %% Re-expand once confirmed working.
 ```
 </details>
 
