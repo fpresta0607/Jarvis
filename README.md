@@ -36,35 +36,38 @@ It can read your emails, photos, and documents (securely), answer questions, sum
 
 ```mermaid
 flowchart LR
-  %% Jarvis High-level Architecture (sanitized & expanded)
-  user[User (Browser)] --> ui[Web App (CloudFront + S3 + Cognito)]
-  ui --> api[API Gateway (HTTP + WS)]
-  api --> ecs[ECS Fargate Services]
+  user["User (Browser)"] --> ui["Web App (CloudFront + S3 + Cognito)"]
+  ui --> api["API Gateway (HTTP + WS)"]
+  api --> ecs["ECS Fargate Services"]
 
-  subgraph Ingestion Pipeline
-    s3raw[S3 Raw Bucket] --> sqsIngest[SQS Ingest Queue]
-    sqsIngest --> sfn[Step Functions Orchestrator]
-    sfn --> proc[Processors (Textract / Transcribe / Rekognition)]
-    proc --> norm[Normalize + Chunk]
-    norm --> emb[Embed (Bedrock)]
+  subgraph Ingestion_Pipeline
+    s3raw["S3 Raw Bucket"] --> sqsIngest["SQS Ingest Queue"]
+    sqsIngest --> sfn["Step Functions Orchestrator"]
+    sfn --> tex["Textract"]
+    sfn --> trs["Transcribe"]
+    sfn --> rek["Rekognition"]
+    tex --> norm["Normalize + Chunk"]
+    trs --> norm
+    rek --> norm
+    norm --> emb["Embed (Bedrock)"]
   end
 
-  emb --> os[(OpenSearch)]
-  norm --> s3cur[S3 Curated Bucket]
+  emb --> os[("OpenSearch")]
+  norm --> s3cur["S3 Curated Bucket"]
 
-  subgraph Data & Knowledge Stores
-    kb[Bedrock Knowledge Base]
+  subgraph Data_and_Knowledge_Stores
+    kb["Bedrock Knowledge Base"]
     os
-    aur[Aurora pgvector]
-    ddb[DynamoDB]
+    aur["Aurora pgvector"]
+    ddb["DynamoDB"]
   end
 
   ecs --> kb
   ecs --> os
   ecs --> aur
   ecs --> ddb
-
   sfn --> ecs
+
 ```
 </details>
 
