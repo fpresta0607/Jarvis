@@ -222,15 +222,15 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-  Browser --> CF[CloudFront]
-  CF --> APIGW[API Gateway]
-  APIGW --> NLB[Internal NLB]
-  NLB --> ECS[ECS Cluster (Private Subnets)]
-  ECS --> S3[(S3)]
-  ECS --> OS[(OpenSearch)]
-  ECS --> DDB[(DynamoDB)]
-  ECS --> AUR[(Aurora pgvector)]
-  ECS --> BR[Bedrock Agent]
+  Browser --> CF["CloudFront"]
+  CF --> APIGW["API Gateway"]
+  APIGW --> NLB["Internal NLB"]
+  NLB --> ECS["ECS Cluster (Private Subnets)"]
+  ECS --> S3["(S3)"]
+  ECS --> OS["(OpenSearch)"]
+  ECS --> DDB["(DynamoDB)"]
+  ECS --> AUR["(Aurora pgvector)"]
+  ECS --> BR["Bedrock Agent"]
 ```
 
 ---
